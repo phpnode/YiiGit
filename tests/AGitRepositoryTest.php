@@ -95,20 +95,6 @@ class AGitRepositoryTest extends CTestCase {
 
 	}
 
-	/**
-	 * Tests running git commands
-	 */
-	public function testRun() {
-		$path = $this->path;
-		$repo = $this->getRepository();
-
-
-		#print_r();
-		print_r($repo->run("commit --porcelain"));
-
-
-
-	}
 
 	/**
 	 * Gets the repository to use for testing

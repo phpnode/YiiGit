@@ -77,4 +77,11 @@ class AGitBranch extends CComponent {
 		}
 		return $this->_commits;
 	}
+	/**
+	 * @return AGitCommit
+	 */
+	public function getLastCommit() {
+		$commits = $this->getCommits();
+		return array_shift($commits);
+	}
 }
