@@ -35,8 +35,9 @@ class AGitRepository extends CApplicationComponent {
 	 * Sets the path to the git repository folder.
 	 * @param string $path the path to the repository folder
 	 * @param boolean $createIfEmpty whether to create the repository folder if it doesn't exist
+	 * @param boolean $initialize whether to initialize git when creating a new repository
 	 */
-	public function setPath($path, $createIfEmpty = false)
+	public function setPath($path, $createIfEmpty = false, $initialize = false)
 	{
 		if (!($realPath = realpath($path))) {
 			if (!$createIfEmpty) {
@@ -50,7 +51,9 @@ class AGitRepository extends CApplicationComponent {
 			if (!$createIfEmpty) {
 				throw new InvalidArgumentException("The specified path is not a git repository");
 			}
-			$this->run("init");
+			if ($initialize) {
+				$this->initialize();
+			}
 		}
 
 	}
@@ -62,6 +65,14 @@ class AGitRepository extends CApplicationComponent {
 	public function getPath()
 	{
 		return $this->_path;
+	}
+
+	/**
+	 * Initializes git
+	 * @return string the response from git
+	 */
+	public function initialize() {
+		return $this->run("init");
 	}
 
 	/**
@@ -173,7 +184,9 @@ class AGitRepository extends CApplicationComponent {
 		foreach(explode("\n", $this->run("status --porcelain")) as $n => $line) {
 			$status = trim(substr($line,0,3));
 			$file = trim(substr($line,3));
-			$files[$file] = $status;
+			if ($file != "") {
+				$files[$file] = $status;
+			}
 		}
 		return $files;
 	}

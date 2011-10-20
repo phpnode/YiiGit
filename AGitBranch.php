@@ -78,6 +78,7 @@ class AGitBranch extends CComponent {
 		return $this->_commits;
 	}
 	/**
+	 * Gets the latest git commit
 	 * @return AGitCommit
 	 */
 	public function getLastCommit() {

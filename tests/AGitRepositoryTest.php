@@ -103,7 +103,7 @@ class AGitRepositoryTest extends CTestCase {
 	protected function getRepository() {
 		if ($this->_repository === null) {
 			$this->_repository = new AGitRepository();
-			$this->_repository->setPath($this->path,true);
+			$this->_repository->setPath($this->path,true,true);
 			$this->assertTrue(file_exists($this->path));
 		}
 		return $this->_repository;
