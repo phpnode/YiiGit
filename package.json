@@ -1,0 +1,12 @@
+{
+	"name": "git",
+	"description": "A Yii wrapper for the git command line executable. Allows access to all git commands via a simple object oriented interface.",
+	"author": "Charles Pick",
+	"installationHash": null,
+	"type": "git",
+	"url": "git@github.com:phpnode\/YiiGit.git",
+	"repositoryName": "local",
+	"dependencies": [
+		
+	]
+}
