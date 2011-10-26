@@ -95,6 +95,13 @@ class AGitRepositoryTest extends CTestCase {
 
 	}
 
+	public function testRemotes() {
+		$repo = new AGitRepository();
+		$repo->path = Yii::getPathOfAlias("packages.git");
+		foreach($repo->getRemotes() as $remote) {
+			$this->assertTrue($remote->name != "");
+		}
+	}
 
 	/**
 	 * Gets the repository to use for testing

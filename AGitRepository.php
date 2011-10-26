@@ -30,6 +30,11 @@ class AGitRepository extends CApplicationComponent {
 	 * @var AGitBranch[]
 	 */
 	protected $_branches;
+	/**
+	 * Holds an array of git remote repositories
+	 * @var AGitRemote[]
+	 */
+	protected $_remotes;
 
 	/**
 	 * Sets the path to the git repository folder.
@@ -256,6 +261,28 @@ class AGitRepository extends CApplicationComponent {
 		return $this->run($command);
 	}
 	/**
+	 * Pushes a branch to a remote repository.
+	 * @param string|AGitRemote $remote the remote repository to push to
+	 * @param string|AGitBranch $branch the git branch to push, defaults to "master"
+	 * @param boolean $force whether to force the push or not, defaults to false
+	 * @return string the response from git
+	 */
+	public function push($remote, $branch = "master", $force = false) {
+		if ($remote instanceof AGitRemote) {
+			$remote = $remote->name;
+		}
+		if ($branch instanceof AGitBranch) {
+			$branch = $branch->name;
+		}
+		if ($force) {
+			$command = "push -f ".$remote." ".$branch;
+		}
+		else {
+			$command = "push ".$remote." ".$branch;
+		}
+		return $this->run($command);
+	}
+	/**
 	 * Gets the active branch
 	 * @return AGitBranch the name of the active branch
 	 */
@@ -318,4 +345,34 @@ class AGitRepository extends CApplicationComponent {
 		$this->_branches = null;
 		return $this->run("fetch ".$repository);
 	}
+	/**
+	 * Gets an array of remote repositories
+	 * @return AGitRemote[] an array of remote repositories
+	 */
+	public function getRemotes()
+	{
+		if ($this->_remotes === null) {
+			$this->_remotes = array();
+			$command = "remote -v";
+			$response = explode("\n",$this->run($command));
+
+			foreach($response as $line) {
+				if (preg_match("/(\w+)\s+(.*) \((fetch|push)\)/",$line,$matches)) {
+					if (!isset($this->_remotes[$matches[1]])) {
+						$this->_remotes[$matches[1]] = new AGitRemote($matches[1],$this);
+					}
+					$remote = $this->_remotes[$matches[1]];
+					if ($matches[3] == "fetch") {
+						$remote->fetchUrl = $matches[2];
+					}
+					else {
+						$remote->pushUrl = $matches[2];
+					}
+				}
+			}
+		}
+		return $this->_remotes;
+	}
+
+
 }
