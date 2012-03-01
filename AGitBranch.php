@@ -11,24 +11,22 @@ class AGitBranch extends CComponent {
 	 * @var AGitRepository
 	 */
 	public $repository;
-
 	/**
 	 * Whether this is the active branch or not
 	 * @var boolean
 	 */
 	public $isActive = false;
-
 	/**
 	 * The name of the git branch
 	 * @var string
 	 */
 	public $name;
-
 	/**
 	 * Holds the commits in this branch
 	 * @var AGitCommit[]
 	 */
 	protected $_commits;
+
 	/**
 	 * Constructor
 	 * @param string $name the name of the branch
@@ -38,6 +36,7 @@ class AGitBranch extends CComponent {
 		$this->repository = $repository;
 		$this->name = $name;
 	}
+
 	/**
 	 * Gets a list of commits in this branch
 	 * @return AGitCommit[] an array of git commits, indexed by hash
@@ -77,6 +76,22 @@ class AGitBranch extends CComponent {
 		}
 		return $this->_commits;
 	}
+
+	/**
+	 * Gets a commit by its hash
+	 * @param string $hash 40 chararcter commit hash of the commit
+	 * @return AGitCommit
+	 */
+	public function getCommit($hash) {
+		$len = strlen($hash);
+		if ($len == 40 && isset($this->_commits[$hash])) {
+			return $this->_commits[$hash];
+		} elseif ($len < 40) {
+			throw new AGitException('Abbreviated commit hashes are not supported yet.');
+		}
+		return null;
+	}
+
 	/**
 	 * Gets the latest git commit
 	 * @return AGitCommit
