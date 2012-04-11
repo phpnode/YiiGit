@@ -187,8 +187,7 @@ class AGitRepository extends CApplicationComponent {
 	public function status() {
 		$files = array();
 		foreach(explode("\n", $this->run("status --porcelain")) as $n => $line) {
-			$status = trim(substr($line,0,3));
-			$file = trim(substr($line,3));
+			list($status, $file) = explode(' ', trim($line), 2);
 			if ($file != "") {
 				$files[$file] = $status;
 			}
