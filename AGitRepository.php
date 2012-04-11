@@ -186,8 +186,15 @@ class AGitRepository extends CApplicationComponent {
 	 */
 	public function status() {
 		$files = array();
-		foreach(explode("\n", $this->run("status --porcelain")) as $n => $line) {
+
+		$output = $this->run("status --porcelain");
+		if (empty($output)) {
+			return $files;
+		}
+
+		foreach(explode("\n", $output) as $n => $line) {
 			list($status, $file) = explode(' ', trim($line), 2);
+
 			if ($file != "") {
 				$files[$file] = $status;
 			}
@@ -212,7 +219,6 @@ class AGitRepository extends CApplicationComponent {
 		$command .= $branchName;
 		$this->_branches = null;
 		return $this->run($command);
-
 	}
 
 	/**
@@ -372,6 +378,4 @@ class AGitRepository extends CApplicationComponent {
 		}
 		return $this->_remotes;
 	}
-
-
 }
