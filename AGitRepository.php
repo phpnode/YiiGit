@@ -297,6 +297,39 @@ class AGitRepository extends CApplicationComponent {
 	}
 
 	/**
+	 * Gets a list of git branches from remote
+	 * @param null|string|AGitRemote $remote the remote repository to check for branches. If null 
+	 * branches for all remotes are returned.
+	 * @return array an array of git branch names. If $remote is null, branch names are prefixed with "[REMOTENAME]/".
+	 */
+	public function getRemoteBranchNames($remote = null) {
+		if ($remote instanceof AGitRemote) {
+			$remote = $remote->name;
+		}
+
+		$branchNames = array();
+
+		foreach(explode("\n",$this->run("branch -r")) as $branchName) {
+			$branchName = trim($branchName);
+
+			if (empty($branchName) || substr_count($branchName, ' -> ')) { //ignore HEAD branch
+				continue;
+			} 
+
+			if(is_string($remote)){
+				list($remoteName, $branchName) = explode('/', $branchName, 2);
+				if ($remote !== $remoteName) { //ignore branches from different remotes
+					continue;
+				}
+			}
+
+			$branchNames[] = $branchName;
+		}
+
+		return $branchNames;
+	}
+
+	/**
 	 * Gets a list of git branches
 	 * @return AGitBranch[] an array of git branches
 	 */
@@ -392,8 +425,25 @@ class AGitRepository extends CApplicationComponent {
 		return $this->_remotes;
 	}
 
+	/**
+	 * Checks if repository has tag
+	 * @param string $tag tag name
+	 * @return bool true if repository has tag, false otherwise
+	 */
 	public function hasTag($tag)
 	{
 		return in_array($tag, $this->getTags());
+	}
+
+	/**
+	 * Checks if repository has a remote branch
+	 * @param string $branch branch name
+	 * @param null|string|AGitRemote $remote the remote repository to check for the branch. If null
+	 * $branch has to be prefixed with "[REMOTENAME]/"
+	 * @return bool true if repository has a remote branch, false otherwise
+	 */
+	public function hasRemoteBranch($branch, $remote)
+	{
+		return in_array($branch, $this->getRemoteBranchNames($remote));
 	}
 }
