@@ -30,6 +30,13 @@ class AGitRepository extends CApplicationComponent {
 	 * @var AGitBranch[]
 	 */
 	protected $_branches;
+
+	/**
+	 * Holds an array of git tags
+	 * @var AGitTag[]
+	 */
+	protected $_tags;
+
 	/**
 	 * Holds an array of git remote repositories
 	 * @var AGitRemote[]
@@ -46,7 +53,7 @@ class AGitRepository extends CApplicationComponent {
 	{
 		if (!($realPath = realpath($path))) {
 			if (!$createIfEmpty) {
-				throw new InvalidArgumentException("The specified path does not exist");
+				throw new InvalidArgumentException("The specified path does not exist: ".$path);
 			}
 			mkdir($path);
 			$realPath = realpath($path);
@@ -194,7 +201,8 @@ class AGitRepository extends CApplicationComponent {
 
 		foreach(explode("\n", $output) as $n => $line) {
 			list($status, $file) = explode(' ', trim($line), 2);
-
+			$status = trim($status);
+			$file = trim($file);
 			if ($file != "") {
 				$files[$file] = $status;
 			}
@@ -319,6 +327,16 @@ class AGitRepository extends CApplicationComponent {
 		}
 		return $this->_branches;
 	}
+
+	/**
+	 * Gets a list of tags in the current branch
+	 * @return AGitTag[] a list of tags
+	 */
+	public function getTags()
+	{
+		return $this->getActiveBranch()->getTags();
+	}
+
 	/**
 	 * Creates a branch with the given name
 	 * @param string $branchName the branch name

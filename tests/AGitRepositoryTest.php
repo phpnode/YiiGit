@@ -1,5 +1,10 @@
 <?php
-Yii::import("packages.git.*");
+require __DIR__."/../AGitRepository.php";
+require __DIR__."/../AGitBranch.php";
+require __DIR__."/../AGitCommit.php";
+require __DIR__."/../AGitException.php";
+require __DIR__."/../AGitRemote.php";
+require __DIR__."/../AGitTag.php";
 class AGitRepositoryTest extends CTestCase {
 	/**
 	 * The path to the test repository
@@ -58,6 +63,7 @@ class AGitRepositoryTest extends CTestCase {
 	 */
 	public function testCommit() {
 		$repo = $this->getRepository();
+		$repo->commit("test"); // make sure there are no hidden changes
 		$this->assertFalse($repo->commit("test")); // no changes, should fail
 		$files = $this->getFiles();
 		foreach($files as $file) {
@@ -95,11 +101,31 @@ class AGitRepositoryTest extends CTestCase {
 
 	}
 
+	public function testTags() {
+		$repo = new AGitRepository();
+		$repo->path = __DIR__."/../";
+		$tag = new AGitTag("example-tag");
+		$tag->message = "This is an example tag that should be deleted";
+		$repo->getActiveBranch()->removeTag($tag);
+		$this->assertTrue($repo->getActiveBranch()->addTag($tag) instanceof AGitTag);
+		$this->assertTrue($tag->hash != "");
+		$this->assertTrue($repo->getActiveBranch()->hasTag("example-tag"));
+		foreach($repo->getTags() as $t) {
+			$this->assertTrue($t->getCommit() instanceof AGitCommit);
+		}
+		$this->assertTrue($repo->getActiveBranch()->removeTag($tag));
+	}
+
 	public function testRemotes() {
 		$repo = new AGitRepository();
-		$repo->path = Yii::getPathOfAlias("packages.git");
+		$repo->path = __DIR__."/../";
 		foreach($repo->getRemotes() as $remote) {
 			$this->assertTrue($remote->name != "");
+			$this->assertGreaterThan(0,count($remote->getBranches()));
+			foreach($remote->getBranches() as $branch) {
+				$this->assertTrue($branch->name != "");
+				$this->assertGreaterThan(0,count($branch->getCommits()));
+			}
 		}
 	}
 
