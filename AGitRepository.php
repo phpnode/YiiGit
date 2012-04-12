@@ -32,12 +32,6 @@ class AGitRepository extends CApplicationComponent {
 	protected $_branches;
 
 	/**
-	 * Holds an array of git tags
-	 * @var AGitTag[]
-	 */
-	protected $_tags;
-
-	/**
 	 * Holds an array of git remote repositories
 	 * @var AGitRemote[]
 	 */
@@ -330,6 +324,7 @@ class AGitRepository extends CApplicationComponent {
 
 	/**
 	 * Gets a list of tags in the current branch
+	 * @see AGitBranch::getTags()
 	 * @return AGitTag[] a list of tags
 	 */
 	public function getTags()

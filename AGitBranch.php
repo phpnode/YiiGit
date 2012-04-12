@@ -131,6 +131,11 @@ class AGitBranch extends CComponent {
 		return $tag;
 	}
 
+	/**
+	 * Removes a particular tag from the repository
+	 * @param AGitTag|string $tag the tag instance or name of the tag to remove
+	 * @return boolean true if removal succeeded
+	 */
 	public function removeTag($tag) {
 		if ($tag instanceof AGitTag) {
 			$tag = $tag->name;
