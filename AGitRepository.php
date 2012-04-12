@@ -341,6 +341,19 @@ class AGitRepository extends CApplicationComponent {
 		$this->_branches = null;
 		return $this->run($command);
 	}
+
+	/**
+	 * Gets a list of git tags
+	 * @return array an array of git tags
+	 */
+	public function getTags() {
+		$tags = array();
+		foreach(explode("\n",$this->run("tag")) as $tagName) {
+			$tags[] = $tagName;
+		}
+
+		return $tags;
+	}
 	/**
 	 * Fetches the given remote
 	 * @param string $repository the name of the remote to fetch, specify "--all" to fetch all remotes
@@ -377,5 +390,10 @@ class AGitRepository extends CApplicationComponent {
 			}
 		}
 		return $this->_remotes;
+	}
+
+	public function hasTag($tag)
+	{
+		return in_array($tag, $this->getTags());
 	}
 }
