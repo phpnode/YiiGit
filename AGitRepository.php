@@ -434,6 +434,16 @@ class AGitRepository extends CApplicationComponent {
 	{
 		return in_array($tag, $this->getTags());
 	}
+	
+	/**
+	 * Checks if repository has a local branch
+	 * @param string $branch branch name
+	 * @return bool true if repository has a local branch, false otherwise
+	 */
+	public function hasBranch($branch)
+	{
+		return in_array($branch, array_keys($this->getBranches()));
+	}
 
 	/**
 	 * Checks if repository has a remote branch
