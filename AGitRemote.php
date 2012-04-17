@@ -63,4 +63,10 @@ class AGitRemote extends CComponent {
 		}
 		return $this->_branches;
 	}
+	
+	public function hasBranch()
+	{
+		throw Exception('Please implement AGitRemote::hasBranch().');
+		return true;
+	}
 }

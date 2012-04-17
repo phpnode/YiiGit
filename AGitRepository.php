@@ -32,6 +32,12 @@ class AGitRepository extends CApplicationComponent {
 	protected $_branches;
 
 	/**
+	 * Holds the tags in this branch
+	 * @var AGitTag[]
+	 */
+	protected $_tags;
+
+	/**
 	 * Holds an array of git remote repositories
 	 * @var AGitRemote[]
 	 */
@@ -322,14 +328,9 @@ class AGitRepository extends CApplicationComponent {
 		return $this->_branches;
 	}
 
-	/**
-	 * Gets a list of tags in the current branch
-	 * @see AGitBranch::getTags()
-	 * @return AGitTag[] a list of tags
-	 */
-	public function getTags()
-	{
-		return $this->getActiveBranch()->getTags();
+	public function hasBranch() {
+		throw Exception('Please implement AGitRepository::hasBranch().');
+		return true;
 	}
 
 	/**
@@ -363,6 +364,92 @@ class AGitRepository extends CApplicationComponent {
 		$this->_branches = null;
 		return $this->run("fetch ".$repository);
 	}
+
+	/**
+	 * Gets a list of tags in this branch
+	 * @return AGitTag[] the list of tags
+	 */
+	public function getTags() {
+		if ($this->_tags !== null) {
+			return $this->_tags;
+		}
+
+		$this->_tags = array();
+		foreach(explode("\n",$this->repository->run("tag")) as $tagName) {
+			$tagName = trim($tagName);
+			if ($tagName != "") {
+				$this->_tags[$tagName] = new AGitTag($tagName,$this);
+			}
+		}
+		return $this->_tags;
+	}
+
+	/**
+	 * Gets a tag with a specific name
+	 * @param string $name the name of the tag
+	 * @return AGitTag|null the tag, or null if it doesn't exist
+	 */
+	public function getTag($name) {
+		if (!$this->hasTag($name)) {
+			return null;
+		}
+		return $this->_tags[$name];
+	}
+
+	/**
+	 * Determines whether the repository has a specific tag or not
+	 * @param AGitTag|string $tag a tag instance or the name of a tag
+	 * @return boolean true if tag exists
+	 */
+	public function hasTag($tag) {
+		if ($tag instanceof AGitTag) {
+			$tag = $tag->name;
+		}
+		$tags = $this->getTags();
+		return isset($tags[$tag]);
+	}
+
+	/**
+	 * Adds the given tag to the repository
+	 * @param AGitTag $tag the tag to add
+	 * @return AGitTag|boolean the added tag, or false if the tag wasn't added
+	 */
+	public function addTag(AGitTag $tag) {
+		$command = "tag -a ".$tag->name;
+		if ($tag->hash != "") {
+			$command .= " ".$tag->hash;
+		}
+		if ($tag->message != "") {
+			$command .= " -m '".addslashes($tag->message)."'";
+		}
+		$this->_tags = null;
+		$this->repository->run($command);
+		$t = $this->getTag($tag->name);
+		foreach($t as $attribute => $value) {
+			$tag->{$attribute} = $value;
+		}
+		return $tag;
+	}
+
+	/**
+	 * Removes a particular tag from the repository
+	 * @param AGitTag|string $tag the tag instance or name of the tag to remove
+	 * @return boolean true if removal succeeded
+	 */
+	public function removeTag($tag) {
+		if ($tag instanceof AGitTag) {
+			$tag = $tag->name;
+		}
+		if (!$this->hasTag($tag)) {
+			return false;
+		}
+		$command = "tag -d ".$tag;
+		$this->repository->run($command);
+		$this->_tags = null;
+		return true;
+	}
+
+
 	/**
 	 * Gets an array of remote repositories
 	 * @return AGitRemote[] an array of remote repositories
