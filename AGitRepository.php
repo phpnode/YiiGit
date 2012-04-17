@@ -12,6 +12,8 @@ class AGitRepository extends CApplicationComponent {
 	 * @var string
 	 */
 	public $gitPath = "git";
+	
+	public $defaultRemote = 'origin';
 
 	/**
 	 * The path to the git repository
@@ -477,5 +479,12 @@ class AGitRepository extends CApplicationComponent {
 			}
 		}
 		return $this->_remotes;
+	}
+	
+	public function getRemote($remote = null)
+	{
+		$remote = is_string($remote) ? $remote : $this->defaultRemote;
+		$remotes = $this->getRemotes();
+		return isset($remotes[$remote]) ? $remotes[$remote] : null;
 	}
 }

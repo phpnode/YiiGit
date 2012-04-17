@@ -33,6 +33,11 @@ class AGitRemote extends CComponent {
 	 * @var AGitBranch[]
 	 */
 	protected $_branches;
+	/**
+	 * A list of tags on the remote server
+	 * @var AGitTag[]
+	 */
+	protected $_tags;
 
 	/**
 	 * Constructor
@@ -51,22 +56,51 @@ class AGitRemote extends CComponent {
 	public function getBranches() {
 		if ($this->_branches === null) {
 			$this->_branches = array();
-			foreach(explode("\n",$this->repository->run("branch -r")) as $branchName) {
-				$branchName = trim($branchName);
-				if (substr($branchName,0,strlen($this->name) + 1) != $this->name.'/') {
-					continue;
-				}
-				$branchName = substr($branchName,strlen($this->name) + 1);
+			foreach(explode("\n",$this->repository->run("ls-remote --heads " . $this->name)) as $ref) {
+				$ref = explode('refs/heads/', trim($ref), 2);
+				$branchName = $ref[1];
 				$branch = new AGitBranch($branchName,$this->repository,$this);
 				$this->_branches[$branchName] = $branch;
 			}
 		}
 		return $this->_branches;
 	}
-	
-	public function hasBranch()
-	{
-		throw Exception('Please implement AGitRemote::hasBranch().');
-		return true;
+
+	/**
+	 * Checks if this remote repository has a specific branch
+	 * @param string $branch branch name
+	 * @return bool true if remote repository has specific branch, false otherwise
+	 */
+	public function hasBranch($branch) {
+		$branches = $this->getBranches();
+		return isset($branches[$branch]);
+	}
+
+	/**
+	 * Gets a list of tags for this remote repository
+	 * @return AGitTag[] an array of tags
+	 */
+	public function getTags() {
+		if ($this->_tags === null) {
+			$this->_tags = array();
+			foreach(explode("\n",$this->repository->run("ls-remote --tags " . $this->name)) as $ref) {
+				//@todo filter out anotated tag objects ^{}
+				$ref = explode('refs/tags/', trim($ref), 2);
+				$tagName = $ref[1];
+				$tag = new AGitTag($tagName,$this->repository,$this);
+				$this->_tags[$tagName] = $tag;
+			}
+		}
+		return $this->_tags;
+	}
+
+	/**
+	 * Checks if this remote repository has a specific tag
+	 * @param string $tag tag name
+	 * @return bool true if remote repository has specific tag, false otherwise
+	 */
+	public function hasTag($tag) {
+		$tags = $this->getTags();
+		return isset($tags[$tag]);
 	}
 }

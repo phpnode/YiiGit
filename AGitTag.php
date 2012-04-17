@@ -37,10 +37,16 @@ class AGitTag extends CComponent
 	public $hash;
 
 	/**
-	 * The branch this tag belongs to
-	 * @var AGitBranch
+	 * The repository this tag belongs to
+	 * @var AGitRepository
 	 */
-	public $branch;
+	public $repository;
+
+	/**
+	 * The remote repository this tag belongs to, if any
+	 * @var AGitRemote
+	 */
+	public $remote;
 
 	/**
 	 * The commit that this tag points to
@@ -53,36 +59,36 @@ class AGitTag extends CComponent
 	 * @param string $name the name of the tag
 	 * @param AGitBranch|null $branch the branch this tag belongs to
 	 */
-	public function __construct($name, AGitBranch $branch = null) {
+	public function __construct($name, AGitRepository $repository, AGitRemote $remote = null) {
+		$this->repository = $repository;
 		$this->name = $name;
-		if ($branch !== null) {
-			$this->branch = $branch;
-			$this->loadData();
-		}
+		$this->remote = $remote;
+
+//		$this->loadData();
 	}
 
 	/**
 	 * Loads the data for the tag
 	 */
-	protected function loadData() {
-		$lineSeparator = "|||||-----|||||-----|||||";
-		$command = 'show --pretty=format:"'.$lineSeparator.'%H" '.$this->name;
-		$response = explode($lineSeparator,$this->branch->repository->run($command));
-		$lines = explode("\n", array_shift($response));
-		array_shift($lines); // we already have the name of the tag
-		if (substr($lines[0],0,8) == "Tagger: ") {
-			$tagger = trim(substr(array_shift($lines),8));
-			if (preg_match("/(.*) <(.*)>/u",$tagger,$matches)) {
-				$this->authorEmail = trim(array_pop($matches));
-				$this->authorName = trim(array_pop($matches));
-			}
-			else {
-				$this->authorName = $tagger;
-			}
-		}
-		$this->message = trim(implode("\n",$lines));
-		$this->hash = array_pop($response);
-	}
+// 	protected function loadData() {
+// 		$lineSeparator = "|||||-----|||||-----|||||";
+// 		$command = 'show --pretty=format:"'.$lineSeparator.'%H" '.$this->name;
+// 		$response = explode($lineSeparator,$this->branch->repository->run($command));
+// 		$lines = explode("\n", array_shift($response));
+// 		array_shift($lines); // we already have the name of the tag
+// 		if (substr($lines[0],0,8) == "Tagger: ") {
+// 			$tagger = trim(substr(array_shift($lines),8));
+// 			if (preg_match("/(.*) <(.*)>/u",$tagger,$matches)) {
+// 				$this->authorEmail = trim(array_pop($matches));
+// 				$this->authorName = trim(array_pop($matches));
+// 			}
+// 			else {
+// 				$this->authorName = $tagger;
+// 			}
+// 		}
+// 		$this->message = trim(implode("\n",$lines));
+// 		$this->hash = array_pop($response);
+// 	}
 
 	/**
 	 * Gets the commit this tag points to
@@ -90,6 +96,7 @@ class AGitTag extends CComponent
 	 */
 	public function getCommit()
 	{
-		return $this->branch->getCommit($this->hash);
+		throw Exception('Implement AGitTag::getCommit()');
+		//return $this->branch->getCommit($this->hash);
 	}
 }
