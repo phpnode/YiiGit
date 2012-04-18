@@ -11,46 +11,55 @@ class AGitCommit extends CComponent {
 	 * @var string
 	 */
 	public $hash;
+
+	/**
+	 * The repository this commit is on
+	 * @var AGitRepository
+	 */
+	public $repository;
+
 	/**
 	 * The name of the commit author
 	 * @var string
 	 */
-	public $authorName;
+	protected $_authorName;
+
 	/**
 	 * The commit author's email address
 	 * @var string
 	 */
-	public $authorEmail;
+	protected $_authorEmail;
+
 	/**
 	 * The time of the commit
 	 * @var string
 	 */
-	public $time;
+	protected $_time;
+
 	/**
 	 * The commit subject
 	 * @var string
 	 */
-	public $subject;
+	protected $_subject;
+
 	/**
 	 * The commit message
 	 * @var string
 	 */
-	public $message;
+	protected $_message;
+
 	/**
 	 * The commit notes
 	 * @var string
 	 */
-	public $notes;
-	/**
-	 * The branch this commit is on
-	 * @var AGitBranch
-	 */
-	public $branch;
+	protected $_notes;
+
 	/**
 	 * Holds an array of files included in this commit
 	 * @var array
 	 */
 	protected $_files;
+
 	/**
 	 * Holds an array of parent commits
 	 * @var AGitCommit[]
@@ -59,23 +68,98 @@ class AGitCommit extends CComponent {
 
 	/**
 	 * Constructor
-	 * @param AGitBranch $branch the git branch
+	 * @param AGitRepository $repository the git repository
 	 */
-	public function __construct(AGitBranch $branch) {
-		$this->branch = $branch;
+	public function __construct($hash, AGitRepository $repository)
+	{
+		$this->hash = $hash;
+		$this->repository = $repository;
+	}
+
+	/**
+	 * The name of the commit author
+	 * @var string
+	 */
+	public function getAuthorName()
+	{
+		if(is_null($this->_authorName)){
+			$this->loadData();
+		}
+		return $this->_authorName;
+	}
+
+	/**
+	 * The commit author's email address
+	 * @var string
+	 */
+	public function getAuthorEmail()
+	{
+		if(is_null($this->_authorEmail)){
+			$this->loadData();
+		}
+		return $this->_authorEmail;
+	}
+
+	/**
+	 * The time of the commit
+	 * @var string
+	 */
+	public function getTime()
+	{
+		if(is_null($this->_time)){
+			$this->loadData();
+		}
+		return $this->_time;
+	}
+
+	/**
+	 * The commit subject
+	 * @var string
+	 */
+	public function getSubject()
+	{
+		if(is_null($this->_subject)){
+			$this->loadData();
+		}
+		return $this->_subject;
+	}
+
+	/**
+	 * The commit message
+	 * @var string
+	 */
+	public function getMessage()
+	{
+		if(is_null($this->_message)){
+			$this->loadData();
+		}
+		return $this->_message;
+	}
+
+	/**
+	 * The commit notes
+	 * @var string
+	 */
+	public function getNotes()
+	{
+		if(is_null($this->_notes)){
+			$this->loadData();
+		}
+		return $this->_notes;
 	}
 
 	/**
 	 * Gets a list of parent commits
 	 * @return AGitCommit[] array of parent commits
 	 */
-	public function getParents() {
+	public function getParents()
+	{
 		if ($this->_parents === null) {
 			$this->_parents = array();
 			$command = 'show --pretty="format:%P" '.$this->hash;
-			foreach(explode(' ',$this->branch->repository->run($command)) as $commitHash) {
+			foreach(explode(' ',$this->repository->run($command)) as $commitHash) {
 				if (!empty($commitHash)) {
-					$this->_parents[$commitHash] = $this->branch->getCommit($commitHash);
+					$this->_parents[$commitHash] = $this->repository->getCommit($commitHash);
 				}
 			}
 		}
@@ -86,13 +170,35 @@ class AGitCommit extends CComponent {
 	 * Gets a list of files affected by this commit
 	 * @return array the files affected by this commit
 	 */
-	public function getFiles() {
+	public function getFiles()
+	{
 		if ($this->_files === null) {
 			$command = 'show --pretty="format:" --name-only '.$this->hash;
-			foreach(explode("\n",$this->branch->repository->run($command)) as $line) {
+			foreach(explode("\n",$this->repository->run($command)) as $line) {
 				$this->_files[] = trim($line);
 			}
 		}
 		return $this->_files;
+	}
+
+	protected function loadData()
+	{
+		$delimiter = "|||---|||---|||";
+		$command = 'show --pretty=format:"%an'.$delimiter.'%ae'.$delimiter.'%cd'.$delimiter.'%s'.$delimiter.'%B'.$delimiter.'%N" ' . $this->hash;
+
+		$response = $this->repository->run($command);
+
+		$parts = explode($delimiter,$response);
+		$this->_authorName = array_shift($parts);
+		$this->_authorEmail = array_shift($parts);
+		$this->_time = array_shift($parts);
+		$this->_subject = array_shift($parts);
+		$this->_message = array_shift($parts);
+		$this->_notes = array_shift($parts);
+	}
+	
+	public function __toString()
+	{
+		return $this->hash;
 	}
 }

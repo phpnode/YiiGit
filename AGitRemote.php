@@ -103,4 +103,9 @@ class AGitRemote extends CComponent {
 		$tags = $this->getTags();
 		return isset($tags[$tag]);
 	}
+	
+	public function __toString()
+	{
+		return $this->name;
+	}
 }

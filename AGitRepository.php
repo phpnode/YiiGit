@@ -130,6 +130,7 @@ class AGitRepository extends CApplicationComponent {
 		}
 		$this->run("add ".$file);
 	}
+
 	/**
 	 * Removes a file or array of files from the git repository
 	 * @throws AGitException if there was an error removing the file
@@ -211,6 +212,7 @@ class AGitRepository extends CApplicationComponent {
 		}
 		return $files;
 	}
+
 	/**
 	 * Switches to the given branch
 	 * @param string $branchName the name of the branch to check out
@@ -247,6 +249,7 @@ class AGitRepository extends CApplicationComponent {
 		}
 		return $this->run($command);
 	}
+
 	/**
 	 * Clones the current repository into a different directory
 	 * @param string $targetDirectory the directory to clone into
@@ -266,6 +269,7 @@ class AGitRepository extends CApplicationComponent {
 		$command = "clone --local ".$targetDirectory." ".$this->getPath();
 		return $this->run($command);
 	}
+
 	/**
 	 * Clones a remote repository into the current repository
 	 * @param string $sourceUrl the remote repository url
@@ -275,6 +279,7 @@ class AGitRepository extends CApplicationComponent {
 		$command = "clone ".$sourceUrl." ".$this->getPath();
 		return $this->run($command);
 	}
+
 	/**
 	 * Pushes a branch to a remote repository.
 	 * @param string|AGitRemote $remote the remote repository to push to
@@ -297,6 +302,17 @@ class AGitRepository extends CApplicationComponent {
 		}
 		return $this->run($command);
 	}
+
+	/**
+	 * Fetches the given remote
+	 * @param string $repository the name of the remote to fetch, specify "--all" to fetch all remotes
+	 * @return string the response from git
+	 */
+	public function fetch($repository) {
+		$this->_branches = null;
+		return $this->run("fetch ".$repository);
+	}
+
 	/**
 	 * Gets the active branch
 	 * @return AGitBranch the name of the active branch
@@ -357,14 +373,27 @@ class AGitRepository extends CApplicationComponent {
 		$this->_branches = null;
 		return $this->run($command);
 	}
+
 	/**
-	 * Fetches the given remote
-	 * @param string $repository the name of the remote to fetch, specify "--all" to fetch all remotes
-	 * @return string the response from git
+	 * Gets a commit by its hash
+	 * @param string $hash 40 chararcter commit hash of the commit
+	 * @return AGitCommit|null
 	 */
-	public function fetch($repository) {
-		$this->_branches = null;
-		return $this->run("fetch ".$repository);
+	public function getCommit($hash) {
+		if (strlen($hash) < 40) {
+			throw new AGitException('Abbreviated commit hashes are not supported yet.');
+		}
+
+		if (!isset($this->_commits[$hash])) {
+			if($this->hasCommit($hash)){
+				$commit = new AGitCommit($hash, $this);
+				$this->_commits[$hash] = $commit;
+			}else{
+				return null;
+			}
+		}
+
+		return $this->_commits[$hash];
 	}
 
 	/**
@@ -377,7 +406,7 @@ class AGitRepository extends CApplicationComponent {
 		}
 
 		$this->_tags = array();
-		foreach(explode("\n",$this->repository->run("tag")) as $tagName) {
+		foreach(explode("\n",$this->run("tag")) as $tagName) {
 			$tagName = trim($tagName);
 			if ($tagName != "") {
 				$this->_tags[$tagName] = new AGitTag($tagName,$this);
@@ -413,23 +442,24 @@ class AGitRepository extends CApplicationComponent {
 
 	/**
 	 * Adds the given tag to the repository
-	 * @param AGitTag $tag the tag to add
-	 * @return AGitTag|boolean the added tag, or false if the tag wasn't added
+	 * @param string $name the name of the new tag
+	 * @param string $message tag description
+	 * @param string $hash hash of a commit, if omitted will tag your current HEAD
+	 * @return AGitTag|null the added tag, or null if the tag wasn't added
 	 */
-	public function addTag(AGitTag $tag) {
-		$command = "tag -a ".$tag->name;
-		if ($tag->hash != "") {
-			$command .= " ".$tag->hash;
+	public function addTag($name, $message, $hash = null) {
+		$command = "tag " . $name;
+		if (is_string($message)) {
+			$command .= " -m '".addslashes($message)."'";
 		}
-		if ($tag->message != "") {
-			$command .= " -m '".addslashes($tag->message)."'";
+		if (is_string($hash)) {
+			$command .= " ".$hash;
 		}
+		$this->run($command);
+
 		$this->_tags = null;
-		$this->repository->run($command);
-		$t = $this->getTag($tag->name);
-		foreach($t as $attribute => $value) {
-			$tag->{$attribute} = $value;
-		}
+		$tag = $this->getTag($name);
+
 		return $tag;
 	}
 
@@ -446,7 +476,7 @@ class AGitRepository extends CApplicationComponent {
 			return false;
 		}
 		$command = "tag -d ".$tag;
-		$this->repository->run($command);
+		$this->run($command);
 		$this->_tags = null;
 		return true;
 	}
@@ -486,5 +516,12 @@ class AGitRepository extends CApplicationComponent {
 		$remote = is_string($remote) ? $remote : $this->defaultRemote;
 		$remotes = $this->getRemotes();
 		return isset($remotes[$remote]) ? $remotes[$remote] : null;
+	}
+	
+	public function hasCommit($hash)
+	{
+		return true;
+		//@todo
+		//$response = $this->run('rev-list ' . $hash);
 	}
 }
