@@ -46,6 +46,15 @@ class AGitRepository extends CApplicationComponent {
 	protected $_remotes;
 
 	/**
+	 * Constructor.
+	 * @param string $path the path to the repository folder
+	 */
+	public function __construct($path = null)
+	{
+		$this->path = $path;
+	}
+
+	/**
 	 * Sets the path to the git repository folder.
 	 * @param string $path the path to the repository folder
 	 * @param boolean $createIfEmpty whether to create the repository folder if it doesn't exist

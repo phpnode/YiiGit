@@ -6,8 +6,7 @@ A Yii wrapper for the git command line executable. Allows access to all git comm
 
 Add some files and folders to git
 <pre>
-$repository = new AGitRepository;
-$repository->path = "path/to/your/git/repo";
+$repository = new AGitRepository("path/to/your/git/repo");
 $repository->add("somefile.txt");
 $repository->add("somedirectory");
 </pre>
