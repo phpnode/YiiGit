@@ -1,7 +1,9 @@
 <?php
 /**
  * Represents a git tag.
+ *
  * @author Charles Pick
+ * @author Jonas Girnatis <dermusterknabe@gmail.com>
  * @package packages.git
  */
 class AGitTag extends CComponent
@@ -53,16 +55,18 @@ class AGitTag extends CComponent
 	 * @param string $name the name of the tag
 	 * @param AGitBranch|null $branch the branch this tag belongs to
 	 */
-	public function __construct($name, AGitRepository $repository, AGitRemote $remote = null) {
+	public function __construct($name, AGitRepository $repository, AGitRemote $remote = null)
+	{
 		$this->repository = $repository;
 		$this->name = $name;
 		$this->remote = $remote;
 	}
 
 	/**
-	 * Loads the data for the tag
+	 * Loads the metadata for the tag
 	 */
-	protected function loadData() {
+	protected function loadData()
+	{
 		$delimiter = '|||||-----|||||-----|||||';
  		$command = 'show --pretty=format:"'.$delimiter.'%H'.$delimiter.'" '.$this->name;
 
@@ -136,6 +140,9 @@ class AGitTag extends CComponent
 		return $this->_commit;
 	}
 	
+	/**
+	 * @return string tag name
+	 */
 	public function __toString()
 	{
 		return $this->name;

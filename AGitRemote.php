@@ -1,7 +1,9 @@
 <?php
 /**
  * Represents a git remote repository
+ *
  * @author Charles Pick
+ * @author Jonas Girnatis <dermusterknabe@gmail.com>
  * @package packages.git
  */
 class AGitRemote extends CComponent {
@@ -28,11 +30,13 @@ class AGitRemote extends CComponent {
 	 * @var AGitRepository
 	 */
 	public $repository;
+
 	/**
 	 * A list of branches on the remote server
 	 * @var AGitBranch[]
 	 */
 	protected $_branches;
+
 	/**
 	 * A list of tags on the remote server
 	 * @var AGitTag[]
@@ -44,7 +48,8 @@ class AGitRemote extends CComponent {
 	 * @param string $name the name of the remote repository
 	 * @param AGitRepository $repository the main git repository this remote belongs to
 	 */
-	public function __construct($name, AGitRepository $repository) {
+	public function __construct($name, AGitRepository $repository)
+	{
 		$this->repository = $repository;
 		$this->name = $name;
 	}
@@ -53,7 +58,8 @@ class AGitRemote extends CComponent {
 	 * Gets a list of git branches for this remote repository
 	 * @return AGitBranch[] an array of git branches
 	 */
-	public function getBranches() {
+	public function getBranches()
+	{
 		if ($this->_branches === null) {
 			$this->_branches = array();
 			foreach(explode("\n",$this->repository->run("ls-remote --heads " . $this->name)) as $ref) {
@@ -71,7 +77,8 @@ class AGitRemote extends CComponent {
 	 * @param string $branch branch name
 	 * @return bool true if remote repository has specific branch, false otherwise
 	 */
-	public function hasBranch($branch) {
+	public function hasBranch($branch)
+	{
 		$branches = $this->getBranches();
 		return isset($branches[$branch]);
 	}
@@ -80,7 +87,8 @@ class AGitRemote extends CComponent {
 	 * Gets a list of tags for this remote repository
 	 * @return AGitTag[] an array of tags
 	 */
-	public function getTags() {
+	public function getTags()
+	{
 		if ($this->_tags === null) {
 			$this->_tags = array();
 			foreach(explode("\n",$this->repository->run("ls-remote --tags " . $this->name)) as $ref) {
@@ -99,11 +107,15 @@ class AGitRemote extends CComponent {
 	 * @param string $tag tag name
 	 * @return bool true if remote repository has specific tag, false otherwise
 	 */
-	public function hasTag($tag) {
+	public function hasTag($tag)
+	{
 		$tags = $this->getTags();
 		return isset($tags[$tag]);
 	}
 	
+	/**
+	 * @return string remote name
+	 */
 	public function __toString()
 	{
 		return $this->name;

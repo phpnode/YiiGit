@@ -3,6 +3,7 @@
  * Represents a git commit.
  *
  * @author Charles Pick
+ * @author Jonas Girnatis <dermusterknabe@gmail.com>
  * @package packages.git
  */
 class AGitCommit extends CComponent {
@@ -181,6 +182,9 @@ class AGitCommit extends CComponent {
 		return $this->_files;
 	}
 
+	/**
+	 * Loads the metadata for the commit
+	 */
 	protected function loadData()
 	{
 		$delimiter = "|||---|||---|||";
@@ -196,7 +200,10 @@ class AGitCommit extends CComponent {
 		$this->_message = array_shift($parts);
 		$this->_notes = array_shift($parts);
 	}
-	
+
+	/**
+	 * @return string commit hash
+	 */
 	public function __toString()
 	{
 		return $this->hash;

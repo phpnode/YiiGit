@@ -3,6 +3,7 @@
  * Represents a git repository for interaction with git.
  *
  * @author Charles Pick
+ * @author Jonas Girnatis <dermusterknabe@gmail.com>
  * @package packages.git
  */
 class AGitRepository extends CApplicationComponent {
@@ -13,6 +14,10 @@ class AGitRepository extends CApplicationComponent {
 	 */
 	public $gitPath = "git";
 	
+	/**
+	 * The default remote name
+	 * @var string
+	 */
 	public $defaultRemote = 'origin';
 
 	/**
@@ -78,7 +83,6 @@ class AGitRepository extends CApplicationComponent {
 				$this->initialize();
 			}
 		}
-
 	}
 
 	/**
@@ -94,7 +98,8 @@ class AGitRepository extends CApplicationComponent {
 	 * Initializes git
 	 * @return string the response from git
 	 */
-	public function initialize() {
+	public function initialize()
+	{
 		return $this->run("init");
 	}
 
@@ -104,7 +109,8 @@ class AGitRepository extends CApplicationComponent {
 	 * @param string $command the git command to run
 	 * @return string the response from git
 	 */
-	public function run($command) {
+	public function run($command)
+	{
 		$descriptor = array(
 			1 => array('pipe', 'w'),
 			2 => array('pipe', 'w'),
@@ -127,7 +133,8 @@ class AGitRepository extends CApplicationComponent {
 	 * @throws AGitException if there was an error adding the file
 	 * @param string|array $file the file or files to add, pass an array to add multiple files
 	 */
-	public function add($file) {
+	public function add($file)
+	{
 		if (is_array($file)) {
 			foreach(array_values($file) as $file) {
 				$this->add($file);
@@ -146,7 +153,8 @@ class AGitRepository extends CApplicationComponent {
 	 * @param string|array $file the file or files to remove, pass an array to remove multiple files
 	 * @param boolean $force whether to force removal of the file, even if there are staged changes
 	 */
-	public function rm($file, $force = false) {
+	public function rm($file, $force = false)
+	{
 		if (is_array($file)) {
 			foreach(array_values($file) as $file) {
 				$this->rm($file);
@@ -171,7 +179,8 @@ class AGitRepository extends CApplicationComponent {
 	 * @param boolean $amend whether the commit
 	 * @return array|false an array of committed files, file => status, or false if the commit failed
 	 */
-	public function commit($message = null, $addFiles = false, $amend = false) {
+	public function commit($message = null, $addFiles = false, $amend = false)
+	{
 		$command = "commit ";
 		if ($addFiles) {
 			$command .= "-a ";
@@ -203,7 +212,8 @@ class AGitRepository extends CApplicationComponent {
 	 * between the index file and the current HEAD commit
 	 * @return array the differences, filename => status
 	 */
-	public function status() {
+	public function status()
+	{
 		$files = array();
 
 		$output = $this->run("status --porcelain");
@@ -229,7 +239,8 @@ class AGitRepository extends CApplicationComponent {
 	 * @param boolean $force whether to force the checkout or not
 	 * @return string the response of the checkout
 	 */
-	public function checkout($branchName, $create = false, $force = false) {
+	public function checkout($branchName, $create = false, $force = false)
+	{
 		$command = "checkout ";
 		if ($create) {
 			$command .= "-b ";
@@ -248,7 +259,8 @@ class AGitRepository extends CApplicationComponent {
 	 * @param boolean $force whether to force the git to perform a clean.
 	 * @return string the response from git
 	 */
-	public function clean($deleteDirectories = false, $force = false) {
+	public function clean($deleteDirectories = false, $force = false)
+	{
 		$command = "clean";
 		if ($deleteDirectories) {
 			$command .= " -d";
@@ -264,7 +276,8 @@ class AGitRepository extends CApplicationComponent {
 	 * @param string $targetDirectory the directory to clone into
 	 * @return string the response from git
 	 */
-	public function cloneTo($targetDirectory) {
+	public function cloneTo($targetDirectory)
+	{
 		$command = "clone --local ".$this->getPath()." ".$targetDirectory;
 		return $this->run($command);
 	}
@@ -274,7 +287,8 @@ class AGitRepository extends CApplicationComponent {
 	 * @param string $sourceDirectory the directory to clone from
 	 * @return string the response from git
 	 */
-	public function cloneFrom($targetDirectory) {
+	public function cloneFrom($targetDirectory)
+	{
 		$command = "clone --local ".$targetDirectory." ".$this->getPath();
 		return $this->run($command);
 	}
@@ -284,7 +298,8 @@ class AGitRepository extends CApplicationComponent {
 	 * @param string $sourceUrl the remote repository url
 	 * @return string the response from git
 	 */
-	public function cloneRemote($sourceUrl) {
+	public function cloneRemote($sourceUrl)
+	{
 		$command = "clone ".$sourceUrl." ".$this->getPath();
 		return $this->run($command);
 	}
@@ -296,7 +311,8 @@ class AGitRepository extends CApplicationComponent {
 	 * @param boolean $force whether to force the push or not, defaults to false
 	 * @return string the response from git
 	 */
-	public function push($remote, $branch = "master", $force = false) {
+	public function push($remote, $branch = "master", $force = false)
+	{
 		if ($remote instanceof AGitRemote) {
 			$remote = $remote->name;
 		}
@@ -317,7 +333,8 @@ class AGitRepository extends CApplicationComponent {
 	 * @param string $repository the name of the remote to fetch, specify "--all" to fetch all remotes
 	 * @return string the response from git
 	 */
-	public function fetch($repository) {
+	public function fetch($repository)
+	{
 		$this->_branches = null;
 		return $this->run("fetch ".$repository);
 	}
@@ -326,7 +343,8 @@ class AGitRepository extends CApplicationComponent {
 	 * Gets the active branch
 	 * @return AGitBranch the name of the active branch
 	 */
-	public function getActiveBranch() {
+	public function getActiveBranch()
+	{
 		$this->getBranches();
 		return $this->_activeBranch;
 	}
@@ -335,7 +353,8 @@ class AGitRepository extends CApplicationComponent {
 	 * Gets a list of git branches
 	 * @return AGitBranch[] an array of git branches
 	 */
-	public function getBranches() {
+	public function getBranches()
+	{
 		if ($this->_branches === null) {
 			$this->_branches = array();
 			foreach(explode("\n",$this->run("branch")) as $branchName) {
@@ -355,7 +374,8 @@ class AGitRepository extends CApplicationComponent {
 		return $this->_branches;
 	}
 
-	public function hasBranch() {
+	public function hasBranch()
+	{
 		throw Exception('Please implement AGitRepository::hasBranch().');
 		return true;
 	}
@@ -365,7 +385,8 @@ class AGitRepository extends CApplicationComponent {
 	 * @param string $branchName the branch name
 	 * @return string the response from git
 	 */
-	public function createBranch($branchName) {
+	public function createBranch($branchName)
+	{
 		$command = "branch ".$branchName;
 		$this->_branches = null;
 		return $this->run($command);
@@ -377,7 +398,8 @@ class AGitRepository extends CApplicationComponent {
 	 * @param boolean $force whether to force the delete
 	 * @return string the response from git
 	 */
-	public function deleteBranch($branchName, $force = false) {
+	public function deleteBranch($branchName, $force = false)
+	{
 		$command = "branch ".($force ? "-D " : "-d ").$branchName;
 		$this->_branches = null;
 		return $this->run($command);
@@ -388,7 +410,8 @@ class AGitRepository extends CApplicationComponent {
 	 * @param string $hash 40 chararcter commit hash of the commit
 	 * @return AGitCommit|null
 	 */
-	public function getCommit($hash) {
+	public function getCommit($hash)
+	{
 		if (strlen($hash) < 40) {
 			throw new AGitException('Abbreviated commit hashes are not supported yet.');
 		}
@@ -405,11 +428,19 @@ class AGitRepository extends CApplicationComponent {
 		return $this->_commits[$hash];
 	}
 
+	public function hasCommit($hash)
+	{
+		return true;
+		//@todo
+		//$response = $this->run('rev-list ' . $hash);
+	}
+
 	/**
 	 * Gets a list of tags in this branch
 	 * @return AGitTag[] the list of tags
 	 */
-	public function getTags() {
+	public function getTags()
+	{
 		if ($this->_tags !== null) {
 			return $this->_tags;
 		}
@@ -429,7 +460,8 @@ class AGitRepository extends CApplicationComponent {
 	 * @param string $name the name of the tag
 	 * @return AGitTag|null the tag, or null if it doesn't exist
 	 */
-	public function getTag($name) {
+	public function getTag($name)
+	{
 		if (!$this->hasTag($name)) {
 			return null;
 		}
@@ -441,7 +473,8 @@ class AGitRepository extends CApplicationComponent {
 	 * @param AGitTag|string $tag a tag instance or the name of a tag
 	 * @return boolean true if tag exists
 	 */
-	public function hasTag($tag) {
+	public function hasTag($tag)
+	{
 		if ($tag instanceof AGitTag) {
 			$tag = $tag->name;
 		}
@@ -456,7 +489,8 @@ class AGitRepository extends CApplicationComponent {
 	 * @param string $hash hash of a commit, if omitted will tag your current HEAD
 	 * @return AGitTag|null the added tag, or null if the tag wasn't added
 	 */
-	public function addTag($name, $message, $hash = null) {
+	public function addTag($name, $message, $hash = null)
+	{
 		$command = "tag " . $name;
 		if (is_string($message)) {
 			$command .= " -m '".addslashes($message)."'";
@@ -477,7 +511,8 @@ class AGitRepository extends CApplicationComponent {
 	 * @param AGitTag|string $tag the tag instance or name of the tag to remove
 	 * @return boolean true if removal succeeded
 	 */
-	public function removeTag($tag) {
+	public function removeTag($tag)
+	{
 		if ($tag instanceof AGitTag) {
 			$tag = $tag->name;
 		}
@@ -489,7 +524,6 @@ class AGitRepository extends CApplicationComponent {
 		$this->_tags = null;
 		return true;
 	}
-
 
 	/**
 	 * Gets an array of remote repositories
@@ -520,17 +554,15 @@ class AGitRepository extends CApplicationComponent {
 		return $this->_remotes;
 	}
 	
+	/**
+	 * Gets a remote repositories.
+	 * @see AGitRepository::$defaultRemote
+	 * @return AGitRemote[] an remote repositories
+	 */
 	public function getRemote($remote = null)
 	{
 		$remote = is_string($remote) ? $remote : $this->defaultRemote;
 		$remotes = $this->getRemotes();
 		return isset($remotes[$remote]) ? $remotes[$remote] : null;
-	}
-	
-	public function hasCommit($hash)
-	{
-		return true;
-		//@todo
-		//$response = $this->run('rev-list ' . $hash);
 	}
 }
