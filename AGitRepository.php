@@ -374,10 +374,19 @@ class AGitRepository extends CApplicationComponent {
 		return $this->_branches;
 	}
 
-	public function hasBranch()
+	/**
+	 * Determines whether the repository has a specific branch or not
+	 * @param AGitBranch|string $branch a branch instance or the name of a branch
+	 * @return boolean true if branch exists
+	 */
+	public function hasBranch($branch)
 	{
-		throw Exception('Please implement AGitRepository::hasBranch().');
-		return true;
+		if ($branch instanceof AGitBranch) {
+			$branch = $branch->name;
+		}
+
+		$branches = $this->getBranches();
+		return isset($branches[$branch]);
 	}
 
 	/**
@@ -491,13 +500,17 @@ class AGitRepository extends CApplicationComponent {
 	 */
 	public function addTag($name, $message, $hash = null)
 	{
-		$command = "tag " . $name;
+		$command = "tag";
 		if (is_string($message)) {
 			$command .= " -m '".addslashes($message)."'";
 		}
+
+		$command .= " ".$name;
+
 		if (is_string($hash)) {
 			$command .= " ".$hash;
 		}
+
 		$this->run($command);
 
 		$this->_tags = null;
