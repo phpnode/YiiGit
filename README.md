@@ -93,7 +93,7 @@ push($remote, $branch = "master", $force = false)
 fetch($repository)
 getActiveBranch()
 getBranches()
-hasBranch()
+hasBranch($branch)
 createBranch($branchName)
 deleteBranch($branchName, $force = false)
 getCommit($hash)
@@ -128,6 +128,7 @@ getLastCommit()
 
 AGitTag
 <pre>
+push($remote = null)
 getAuthorName()
 getAuthorEmail()
 getMessage()

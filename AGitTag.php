@@ -141,6 +141,20 @@ class AGitTag extends CComponent
 	}
 	
 	/**
+	 * Pushes a tag to a remote repository.
+	 * @param null|string|AGitRemote $remote the remote repository to push to. If null, falls back to repository $defaultRemote.
+	 * @return string the response from git
+	 */
+	public function push($remote = null)
+	{
+		if (is_null($remote)) {
+			$remote = $this->repository->remote;
+		}
+
+		return $this->repository->run("push $remote tag $this->name");
+	}
+	
+	/**
 	 * @return string tag name
 	 */
 	public function __toString()
