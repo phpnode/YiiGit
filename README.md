@@ -139,6 +139,7 @@ AGitRemote
 <pre>
 getBranches()
 hasBranch($branch)
+deleteBranch($branchName)
 getTags()
 hasTag($tag)
 </pre>

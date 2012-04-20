@@ -86,10 +86,9 @@ class AGitRemote extends CComponent {
 	/**
 	 * Deletes the remote branch with the given name
 	 * @param string $branchName the branch name
-	 * @param boolean $force whether to force the delete
 	 * @return string the response from git
 	 */
-	public function deleteBranch($branchName, $force = false)
+	public function deleteBranch($branchName)
 	{
 		$this->_branches = null;
 		return $this->repository->run("push $this->name :$branchName");
