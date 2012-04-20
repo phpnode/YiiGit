@@ -402,7 +402,7 @@ class AGitRepository extends CApplicationComponent {
 	}
 
 	/**
-	 * Creates a branch with the given name
+	 * Deletes the local branch with the given name
 	 * @param string $branchName the branch name
 	 * @param boolean $force whether to force the delete
 	 * @return string the response from git
@@ -495,11 +495,15 @@ class AGitRepository extends CApplicationComponent {
 	 * Adds the given tag to the repository
 	 * @param string $name the name of the new tag
 	 * @param string $message tag description
-	 * @param string $hash hash of a commit, if omitted will tag your current HEAD
+	 * @param string|AGitCommit $hash commit object or hash of a commit, if omitted will tag your current HEAD
 	 * @return AGitTag|null the added tag, or null if the tag wasn't added
 	 */
 	public function addTag($name, $message, $hash = null)
 	{
+		if ($hash instanceof AGitCommit) {
+			$hash = $hash->hash;
+		}
+
 		$command = "tag";
 		if (is_string($message)) {
 			$command .= " -m '".addslashes($message)."'";
