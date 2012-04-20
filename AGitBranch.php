@@ -59,8 +59,8 @@ class AGitBranch extends CComponent {
 			$branchName = $this->remote ? $this->remote->name.'/'.$this->name : $this->name;
 			$command = 'log --pretty=format:"%H" ' . $branchName;
 			foreach(explode("\n",$this->repository->run($command)) as $hash) {
-				$line = trim($line);
-				if (!$line) {
+				$hash = trim($hash);
+				if (!$hash) {
 					continue;
 				}
 				$this->_commits[$hash] = new AGitCommit($hash, $this->repository);
