@@ -32,18 +32,6 @@ class AGitRemote extends CComponent {
 	public $repository;
 
 	/**
-	 * A list of branches on the remote server
-	 * @var AGitBranch[]
-	 */
-	protected $_branches;
-
-	/**
-	 * A list of tags on the remote server
-	 * @var AGitTag[]
-	 */
-	protected $_tags;
-
-	/**
 	 * Constructor
 	 * @param string $name the name of the remote repository
 	 * @param AGitRepository $repository the main git repository this remote belongs to
@@ -60,16 +48,14 @@ class AGitRemote extends CComponent {
 	 */
 	public function getBranches()
 	{
-		if ($this->_branches === null) {
-			$this->_branches = array();
-			foreach(explode("\n",$this->repository->run("ls-remote --heads " . $this->name)) as $ref) {
-				$ref = explode('refs/heads/', trim($ref), 2);
-				$branchName = $ref[1];
-				$branch = new AGitBranch($branchName,$this->repository,$this);
-				$this->_branches[$branchName] = $branch;
-			}
+		$branches = array();
+		foreach(explode("\n",$this->repository->run("ls-remote --heads " . $this->name)) as $ref) {
+			$ref = explode('refs/heads/', trim($ref), 2);
+			$branchName = $ref[1];
+			$branch = new AGitBranch($branchName,$this->repository,$this);
+			$branches[$branchName] = $branch;
 		}
-		return $this->_branches;
+		return $branches;
 	}
 
 	/**
@@ -90,7 +76,6 @@ class AGitRemote extends CComponent {
 	 */
 	public function deleteBranch($branchName)
 	{
-		$this->_branches = null;
 		return $this->repository->run("push $this->name :$branchName");
 	}
 
@@ -101,17 +86,15 @@ class AGitRemote extends CComponent {
 	 */
 	public function getTags()
 	{
-		if ($this->_tags === null) {
-			$this->_tags = array();
-			foreach(explode("\n",$this->repository->run("ls-remote --tags " . $this->name)) as $ref) {
-				if(substr_count($ref, '^{}')){ continue; } //ignore dereferenced tag objects for annotated tags
-				$ref = explode('refs/tags/', trim($ref), 2);
-				$tagName = $ref[1];
-				$tag = new AGitTag($tagName,$this->repository,$this);
-				$this->_tags[$tagName] = $tag;
-			}
+		$tags = array();
+		foreach(explode("\n",$this->repository->run("ls-remote --tags " . $this->name)) as $ref) {
+			if(substr_count($ref, '^{}')){ continue; } //ignore dereferenced tag objects for annotated tags
+			$ref = explode('refs/tags/', trim($ref), 2);
+			$tagName = $ref[1];
+			$tag = new AGitTag($tagName,$this->repository,$this);
+			$tags[$tagName] = $tag;
 		}
-		return $this->_tags;
+		return $tags;
 	}
 
 	/**
@@ -124,7 +107,7 @@ class AGitRemote extends CComponent {
 		$tags = $this->getTags();
 		return isset($tags[$tag]);
 	}
-	
+
 	/**
 	 * @return string remote name
 	 */
