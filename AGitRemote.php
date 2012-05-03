@@ -1,7 +1,9 @@
 <?php
 /**
  * Represents a git remote repository
+ *
  * @author Charles Pick
+ * @author Jonas Girnatis <dermusterknabe@gmail.com>
  * @package packages.git
  */
 class AGitRemote extends CComponent {
@@ -28,18 +30,14 @@ class AGitRemote extends CComponent {
 	 * @var AGitRepository
 	 */
 	public $repository;
-	/**
-	 * A list of branches on the remote server
-	 * @var AGitBranch[]
-	 */
-	protected $_branches;
 
 	/**
 	 * Constructor
 	 * @param string $name the name of the remote repository
 	 * @param AGitRepository $repository the main git repository this remote belongs to
 	 */
-	public function __construct($name, AGitRepository $repository) {
+	public function __construct($name, AGitRepository $repository)
+	{
 		$this->repository = $repository;
 		$this->name = $name;
 	}
@@ -48,19 +46,73 @@ class AGitRemote extends CComponent {
 	 * Gets a list of git branches for this remote repository
 	 * @return AGitBranch[] an array of git branches
 	 */
-	public function getBranches() {
-		if ($this->_branches === null) {
-			$this->_branches = array();
-			foreach(explode("\n",$this->repository->run("branch -r")) as $branchName) {
-				$branchName = trim($branchName);
-				if (substr($branchName,0,strlen($this->name) + 1) != $this->name.'/') {
-					continue;
-				}
-				$branchName = substr($branchName,strlen($this->name) + 1);
-				$branch = new AGitBranch($branchName,$this->repository,$this);
-				$this->_branches[$branchName] = $branch;
-			}
+	public function getBranches()
+	{
+		$branches = array();
+		foreach(explode("\n",$this->repository->run("ls-remote --heads " . $this->name)) as $ref) {
+			$ref = explode('refs/heads/', trim($ref), 2);
+			$branchName = $ref[1];
+			$branch = new AGitBranch($branchName,$this->repository,$this);
+			$branches[$branchName] = $branch;
 		}
-		return $this->_branches;
+		return $branches;
+	}
+
+	/**
+	 * Checks if this remote repository has a specific branch
+	 * @param string $branch branch name
+	 * @return bool true if remote repository has specific branch, false otherwise
+	 */
+	public function hasBranch($branch)
+	{
+		$branches = $this->getBranches();
+		return isset($branches[$branch]);
+	}
+
+	/**
+	 * Deletes the remote branch with the given name
+	 * @param string $branchName the branch name
+	 * @return string the response from git
+	 */
+	public function deleteBranch($branchName)
+	{
+		return $this->repository->run("push $this->name :$branchName");
+	}
+
+
+	/**
+	 * Gets a list of tags for this remote repository
+	 * @return AGitTag[] an array of tags
+	 */
+	public function getTags()
+	{
+		$tags = array();
+		foreach(explode("\n",$this->repository->run("ls-remote --tags " . $this->name)) as $ref) {
+			if(substr_count($ref, '^{}')){ continue; } //ignore dereferenced tag objects for annotated tags
+			$ref = explode('refs/tags/', trim($ref), 2);
+			$tagName = $ref[1];
+			$tag = new AGitTag($tagName,$this->repository,$this);
+			$tags[$tagName] = $tag;
+		}
+		return $tags;
+	}
+
+	/**
+	 * Checks if this remote repository has a specific tag
+	 * @param string $tag tag name
+	 * @return bool true if remote repository has specific tag, false otherwise
+	 */
+	public function hasTag($tag)
+	{
+		$tags = $this->getTags();
+		return isset($tags[$tag]);
+	}
+
+	/**
+	 * @return string remote name
+	 */
+	public function __toString()
+	{
+		return $this->name;
 	}
 }
