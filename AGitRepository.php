@@ -49,6 +49,12 @@ class AGitRepository extends CApplicationComponent {
 	 * @var AGitRemote[]
 	 */
 	protected $_remotes;
+	
+	/**
+	 * Holds an array of git commits in this repository
+	 * @var AGitCommit[]
+	 */
+	protected $_commits = array();
 
 	/**
 	 * Constructor.
