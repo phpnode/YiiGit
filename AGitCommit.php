@@ -181,6 +181,19 @@ class AGitCommit extends CComponent {
 		}
 		return $this->_files;
 	}
+	
+	/**
+	 * Retrieves the contents of a file at a specific commit.  If binary, it will
+	 * return the binary content.
+	 *
+	 * @param string $filename
+	 * @return string
+	 */
+	public function getFileContents($filename)
+	{
+		$command = sprintf('show --raw %s:%s', $this->hash, $filename);
+		return $this->repository->run($command);
+	}
 
 	/**
 	 * Loads the metadata for the commit
