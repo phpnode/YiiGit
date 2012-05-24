@@ -158,8 +158,11 @@ class AGitCommit extends CComponent {
 		if ($this->_parents === null) {
 			$this->_parents = array();
 			$command = 'show --pretty="format:%P" '.$this->hash;
-			foreach(explode(' ',$this->repository->run($command)) as $commitHash) {
-				if (!empty($commitHash)) {
+			$results = $this->repository->run($command);
+			$lines   = preg_split("/(\r|\n|\s)/", $results);
+			foreach($lines as $commitHash) {
+				$commitHash = trim($commitHash);
+				if (preg_match('/^[a-f0-9]{40}$/i', $commitHash)) {
 					$this->_parents[$commitHash] = $this->repository->getCommit($commitHash);
 				}
 			}
