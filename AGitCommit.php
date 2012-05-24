@@ -157,7 +157,7 @@ class AGitCommit extends CComponent {
 	{
 		if ($this->_parents === null) {
 			$this->_parents = array();
-			$command = 'show --pretty="format:%P" '.$this->hash;
+			$command = 'git log --pretty=%P -n 1 '.$this->hash;
 			foreach(explode(' ',$this->repository->run($command)) as $commitHash) {
 				if (!empty($commitHash)) {
 					$this->_parents[$commitHash] = $this->repository->getCommit($commitHash);
