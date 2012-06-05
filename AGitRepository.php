@@ -239,6 +239,17 @@ class AGitRepository extends CApplicationComponent {
 	}
 
 	/**
+	 * Describes the state of the current repository (returns closest tag to current HEAD)
+	 * @param string $options specify "--tags" to fetch all tags (defaults to annotated tags only). 
+	 * @see git help describe for more options and exact return values.
+	 * @return string the response from git
+	 */
+	public function describe($options = '')
+	{
+		return $this->run("describe " . $options);
+	}
+
+	/**
 	 * Switches to the given branch
 	 * @param string $branchName the name of the branch to check out
 	 * @param boolean $create whether to create the branch or not
