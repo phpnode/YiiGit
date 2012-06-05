@@ -379,7 +379,7 @@ class AGitRepository extends CApplicationComponent {
 				if (substr($branchName,0,2) == "* ") {
 					$isActive = true;
 				}
-				$branchName = substr($branchName,2);
+				$branchName = trim($branchName, '* ');
 				$branch = new AGitBranch($branchName,$this);
 				if ($isActive) {
 					$branch->isActive = true;
