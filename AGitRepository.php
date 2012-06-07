@@ -81,7 +81,7 @@ class AGitRepository extends CApplicationComponent {
 			$realPath = realpath($path);
 		}
 		$this->_path = $realPath;
-		if (!file_exists($realPath."/.git") || !is_dir($realPath."/.git")) {
+		if (!file_exists($realPath."/.git")) {
 			if (!$createIfEmpty) {
 				throw new InvalidArgumentException("The specified path is not a git repository");
 			}
