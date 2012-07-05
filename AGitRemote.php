@@ -88,7 +88,7 @@ class AGitRemote extends CComponent {
 	{
 		$tags = array();
 		foreach(explode("\n",$this->repository->run("ls-remote --tags " . $this->name)) as $i => $ref) {
-			if($i == 1) { continue; } //ignore first line "From: repository..."
+			if($i == 0) { continue; } //ignore first line "From: repository..."
 			if(substr_count($ref, '^{}')){ continue; } //ignore dereferenced tag objects for annotated tags
 			$ref = explode('refs/tags/', trim($ref), 2);
 			$tagName = $ref[1];
