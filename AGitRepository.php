@@ -59,10 +59,12 @@ class AGitRepository extends CApplicationComponent {
 	/**
 	 * Constructor.
 	 * @param string $path the path to the repository folder
+	 * @param boolean $createIfEmpty whether to create the repository folder if it doesn't exist
+	 * @param boolean $initialize whether to initialize git when creating a new repository
 	 */
-	public function __construct($path = null)
+	public function __construct($path = null, $createIfEmpty = false, $initialize = false)
 	{
-		$this->path = $path;
+		$this->setPath($path, $createIfEmpty, $initialize);
 	}
 
 	/**
@@ -82,11 +84,11 @@ class AGitRepository extends CApplicationComponent {
 		}
 		$this->_path = $realPath;
 		if (!file_exists($realPath."/.git")) {
-			if (!$createIfEmpty) {
-				throw new InvalidArgumentException("The specified path is not a git repository");
-			}
 			if ($initialize) {
 				$this->initialize();
+			}
+			else {
+				throw new InvalidArgumentException("The specified path is not a git repository");
 			}
 		}
 	}
