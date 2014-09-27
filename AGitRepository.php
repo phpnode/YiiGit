@@ -179,6 +179,32 @@ class AGitRepository extends CApplicationComponent {
 			$this->run("rm ".$file);
 		}
 	}
+	
+	/**
+	 * Rename directory
+	 * 
+	 * @param string $src - source dir
+	 * @param string $dest - destination dir
+	 * @param bool $force - force renaming or moving of a file even if the target exists
+	 * @throws AGitException if $src not exist
+	 * @return string - command output
+	 */
+	public function mv($src, $dest, $force = false)
+	{
+		$command = "mv $src $dest";
+		
+		if (!file_exists($this->getPath()."/".$src)) {
+			throw new AGitException("Cannot rename '$src' dir in the repository because it doesn't exist");
+		}
+		
+		if ($force) {
+			$command .= " -f";
+		}
+		
+		$result = $this->run($command);
+		Yii::log("git $command : ".CVarDumper::dumpAsString( $result ), CLogger::LEVEL_INFO, "AGitRepository");
+		return $result;
+	}
 
 	/**
 	 * Makes a git commit
